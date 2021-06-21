@@ -1,0 +1,406 @@
+
+import keyboard
+import os
+import time
+import pyautogui
+import re
+import random
+import pathlib
+
+
+game_screen_list = []
+
+screen_row1 = ''
+screen_row2 = ''
+screen_row3 = ''
+screen_row4 = ''
+screen_row5 = ''
+screen_row6 = ''
+screen_row7 = ''
+screen_row8 = ''
+screen_row9 = ''
+screen_row10 = ''
+screen_row11 = ''
+screen_row12 = ''
+screen_row13 = ''
+screen_row14 = ''
+screen_row15 = ''
+screen_row16 = ''
+screen_row17 = ''
+screen_row18 = ''
+screen_row19 = ''
+screen_row20 = ''
+screen_row21 = ''
+screen_row22 = ''
+screen_row23 = ''
+screen_row24 = ''
+screen_row25 = ''
+screen_row26 = ''
+screen_row27 = ''
+screen_row28 = ''
+screen_row29 = ''
+screen_row30 = ''
+screen_row31 = ''
+
+chosen_word = ''
+
+
+def main_menu():
+
+    runner1 = 1
+    while runner1 == 1:
+
+        print('1. Start game')
+        print('2. Options')
+        print('3. High score')
+        print('4. Exit')
+        print('')
+
+        while runner1 == 1:
+
+            if keyboard.is_pressed('1'):
+                the_game()
+
+            elif keyboard.is_pressed('2'):
+                game_options()
+
+            elif keyboard.is_pressed('3'):
+                game_high_score()
+
+            elif keyboard.is_pressed('4'):
+                quit()
+
+
+def the_game():
+
+    while 1 == 1:
+        word_faller()
+        game_screen()
+
+
+def game_options():
+    print('game_options')
+
+
+def game_high_score():
+    print('game_high_score')
+
+
+def game_screen():
+    game_screen_list_to_print()
+
+    global screen_row1
+    global screen_row2
+    global screen_row3
+    global screen_row4
+    global screen_row5
+    global screen_row6
+    global screen_row7
+    global screen_row8
+    global screen_row9
+    global screen_row10
+    global screen_row11
+    global screen_row12
+    global screen_row13
+    global screen_row14
+    global screen_row15
+    global screen_row16
+    global screen_row17
+    global screen_row18
+    global screen_row19
+    global screen_row20
+    global screen_row21
+    global screen_row22
+    global screen_row23
+    global screen_row24
+    global screen_row25
+    global screen_row26
+    global screen_row27
+    global screen_row28
+    global screen_row29
+    global screen_row30
+    global screen_row31
+
+    print('')
+    print('')
+    print('')
+    print('')
+    print('')
+
+    print(screen_row1)
+    print(screen_row2)
+    print(screen_row3)
+    print(screen_row4)
+    print(screen_row5)
+    print(screen_row6)
+    print(screen_row7)
+    print(screen_row8)
+    print(screen_row9)
+    print(screen_row10)
+    print(screen_row11)
+    print(screen_row12)
+    print(screen_row13)
+    print(screen_row14)
+    print(screen_row15)
+    print(screen_row16)
+    print(screen_row17)
+    print(screen_row18)
+    print(screen_row19)
+    print(screen_row20)
+    print(screen_row21)
+    print(screen_row22)
+    print(screen_row23)
+    print(screen_row24)
+    print(screen_row25)
+    print(screen_row26)
+    print(screen_row27)
+    print(screen_row28)
+    print(screen_row29)
+    print(screen_row30)
+    print(screen_row31)
+
+    time.sleep(1)
+    os.system('cls')
+
+
+def create_game_screen_list():
+
+    for i in range(0, 30):
+        game_screen_list.append([])
+
+    for i in range(0, 30):
+        for z in range(0, 35):
+            game_screen_list[i].append(' ')
+
+        for x in range(0, 112):
+            game_screen_list[i].append('X')
+
+    for i in range(1, 29):
+        for z in range(36, 146):
+            game_screen_list[i][z] = ' '
+
+    # print(game_screen_list)
+
+
+def game_screen_list_to_print():
+
+    global screen_row1
+    global screen_row2
+    global screen_row3
+    global screen_row4
+    global screen_row5
+    global screen_row6
+    global screen_row7
+    global screen_row8
+    global screen_row9
+    global screen_row10
+    global screen_row11
+    global screen_row12
+    global screen_row13
+    global screen_row14
+    global screen_row15
+    global screen_row16
+    global screen_row17
+    global screen_row18
+    global screen_row19
+    global screen_row20
+    global screen_row21
+    global screen_row22
+    global screen_row23
+    global screen_row24
+    global screen_row25
+    global screen_row26
+    global screen_row27
+    global screen_row28
+    global screen_row29
+    global screen_row30
+    global screen_row31
+###
+    screen_row1 = ''
+    screen_row2 = ''
+    screen_row3 = ''
+    screen_row4 = ''
+    screen_row5 = ''
+    screen_row6 = ''
+    screen_row7 = ''
+    screen_row8 = ''
+    screen_row9 = ''
+    screen_row10 = ''
+    screen_row11 = ''
+    screen_row12 = ''
+    screen_row13 = ''
+    screen_row14 = ''
+    screen_row15 = ''
+    screen_row16 = ''
+    screen_row17 = ''
+    screen_row18 = ''
+    screen_row19 = ''
+    screen_row20 = ''
+    screen_row21 = ''
+    screen_row22 = ''
+    screen_row23 = ''
+    screen_row24 = ''
+    screen_row25 = ''
+    screen_row26 = ''
+    screen_row27 = ''
+    screen_row28 = ''
+    screen_row29 = ''
+    screen_row30 = ''
+    screen_row31 = ''
+
+    for x in range(0, 147):
+        screen_row1 = screen_row1 + game_screen_list[0][x]
+
+    for x in range(0, 147):
+        screen_row2 = screen_row2 + game_screen_list[1][x]
+
+    for x in range(0, 147):
+        screen_row3 = screen_row3 + game_screen_list[2][x]
+
+    for x in range(0, 147):
+        screen_row4 = screen_row4 + game_screen_list[3][x]
+
+    for x in range(0, 147):
+        screen_row5 = screen_row5 + game_screen_list[4][x]
+
+    for x in range(0, 147):
+        screen_row6 = screen_row6 + game_screen_list[5][x]
+
+    for x in range(0, 147):
+        screen_row7 = screen_row7 + game_screen_list[6][x]
+
+    for x in range(0, 147):
+        screen_row8 = screen_row8 + game_screen_list[7][x]
+
+    for x in range(0, 147):
+        screen_row9 = screen_row9 + game_screen_list[8][x]
+
+    for x in range(0, 147):
+        screen_row10 = screen_row10 + game_screen_list[9][x]
+
+    for x in range(0, 147):
+        screen_row11 = screen_row11 + game_screen_list[10][x]
+
+    for x in range(0, 147):
+        screen_row12 = screen_row12 + game_screen_list[11][x]
+
+    for x in range(0, 147):
+        screen_row13 = screen_row13 + game_screen_list[12][x]
+
+    for x in range(0, 147):
+        screen_row14 = screen_row14 + game_screen_list[13][x]
+
+    for x in range(0, 147):
+        screen_row15 = screen_row15 + game_screen_list[14][x]
+
+    for x in range(0, 147):
+        screen_row16 = screen_row16 + game_screen_list[15][x]
+
+    for x in range(0, 147):
+        screen_row17 = screen_row17 + game_screen_list[16][x]
+
+    for x in range(0, 147):
+        screen_row18 = screen_row18 + game_screen_list[17][x]
+
+    for x in range(0, 147):
+        screen_row19 = screen_row19 + game_screen_list[18][x]
+
+    for x in range(0, 147):
+        screen_row20 = screen_row20 + game_screen_list[19][x]
+
+    for x in range(0, 147):
+        screen_row21 = screen_row21 + game_screen_list[20][x]
+
+    for x in range(0, 147):
+        screen_row22 = screen_row22 + game_screen_list[21][x]
+
+    for x in range(0, 147):
+        screen_row23 = screen_row23 + game_screen_list[22][x]
+
+    for x in range(0, 147):
+        screen_row24 = screen_row24 + game_screen_list[23][x]
+
+    for x in range(0, 147):
+        screen_row25 = screen_row25 + game_screen_list[24][x]
+
+    for x in range(0, 147):
+        screen_row26 = screen_row26 + game_screen_list[25][x]
+
+    for x in range(0, 147):
+        screen_row27 = screen_row27 + game_screen_list[26][x]
+
+    for x in range(0, 147):
+        screen_row28 = screen_row28 + game_screen_list[27][x]
+
+    for x in range(0, 147):
+        screen_row29 = screen_row29 + game_screen_list[28][x]
+
+    for x in range(0, 147):
+        screen_row30 = screen_row30 + game_screen_list[29][x]
+
+
+def word_randomizer():
+
+    global chosen_word
+
+    os.chdir(pathlib.Path.cwd()/'TextFiles')
+    the_text_list_file = open('WordList.txt')
+    word_list1 = the_text_list_file.readlines()     # WordList is saved as a string in a list
+    word_list2_str = word_list1[0]
+    the_text_list_file.close()
+
+    words_regex = re.compile(r'(\w+)\s')
+    word_list3 = words_regex.findall(word_list2_str)      # finds all the words in the string and puts them in a list
+    # print(word_list3)
+
+    random_number = random.randint(0, len(word_list3) - 1)      # Randomize a number
+    # print(random_number)
+
+    chosen_word = word_list3[random_number]                     # Randomize a word
+
+
+def word_faller():
+
+    global game_screen_list
+
+    max_word_start = 146 - len(chosen_word)
+
+    the_word_start = random.randint(36, max_word_start)
+    the_word_move = the_word_start
+
+
+    for i in chosen_word:
+        game_screen_list[1][the_word_move] = i             # starting position of the word
+        the_word_move = the_word_move + 1
+
+    for x in range(1, 30):
+        game_screen_list_to_print()                         # updates the screen list
+        game_screen()                                       # prints the screen
+
+        the_word_move = the_word_start
+        for i in chosen_word:                               # for loop takes the word to the bottom
+
+            game_screen_list[x][the_word_move] = i
+            the_word_move = the_word_move + 1
+
+            if x != 1:
+                game_screen_list[x - 1][the_word_move - 1] = ' '        # Clears the previous row
+
+
+
+    # start position of word can be : (146 - len(theWord)
+    # randomize the start position
+    # game_screen_list[0][7] some kind of for loop ---> word length of BOB    word is BOB
+    # screen clears and pause for 1 sec
+    # game_screen_list[1][7]
+
+    # new function for word falling
+
+
+
+pyautogui.press('f11')
+word_randomizer()
+print(chosen_word)
+create_game_screen_list()
+
+main_menu()
