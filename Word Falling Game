@@ -9,6 +9,7 @@ import pathlib
 
 
 game_screen_list = []
+chosen_word_keyboard_list = []
 
 screen_row1 = ''
 screen_row2 = ''
@@ -43,6 +44,10 @@ screen_row30 = ''
 screen_row31 = ''
 
 chosen_word = ''
+current_chosen_word_letter = ''
+chosen_word_ticker = 0
+build_keyboard_list = 1
+word_is_complete = 0
 
 
 def main_menu():
@@ -59,6 +64,7 @@ def main_menu():
         while runner1 == 1:
 
             if keyboard.is_pressed('1'):
+                os.system('cls')
                 the_game()
 
             elif keyboard.is_pressed('2'):
@@ -75,7 +81,8 @@ def the_game():
 
     while 1 == 1:
         word_faller()
-        game_screen()
+        word_randomizer()
+       # game_screen()
 
 
 def game_options():
@@ -159,8 +166,7 @@ def game_screen():
     print(screen_row30)
     print(screen_row31)
 
-    time.sleep(1)
-    os.system('cls')
+    #game_keyboard_listener_and_pause_screen()
 
 
 def create_game_screen_list():
@@ -342,12 +348,14 @@ def game_screen_list_to_print():
 def word_randomizer():
 
     global chosen_word
+    global build_keyboard_list
 
     os.chdir(pathlib.Path.cwd()/'TextFiles')
     the_text_list_file = open('WordList.txt')
     word_list1 = the_text_list_file.readlines()     # WordList is saved as a string in a list
     word_list2_str = word_list1[0]
     the_text_list_file.close()
+    os.chdir(pathlib.Path.cwd()/'..')
 
     words_regex = re.compile(r'(\w+)\s')
     word_list3 = words_regex.findall(word_list2_str)      # finds all the words in the string and puts them in a list
@@ -358,24 +366,68 @@ def word_randomizer():
 
     chosen_word = word_list3[random_number]                     # Randomize a word
 
+    chosen_word_keyboard_list.clear()  # clears the keyboard list
+    build_keyboard_list = 1
 
 def word_faller():
 
     global game_screen_list
+    global chosen_word
+    global chosen_word_keyboard_list
+    global build_keyboard_list
+    global chosen_word_ticker
+    global word_is_complete
 
     max_word_start = 146 - len(chosen_word)
 
     the_word_start = random.randint(36, max_word_start)
     the_word_move = the_word_start
 
-
     for i in chosen_word:
         game_screen_list[1][the_word_move] = i             # starting position of the word
         the_word_move = the_word_move + 1
 
+    time_to_break = 0
     for x in range(1, 30):
+
+        if x == 1:
+            chosen_word_ticker = 0
+
+        elif word_complete_checker() == 1 or word_is_complete == 1:                    # checks if the word is complete
+
+            length_chosen_word = len(chosen_word)
+            chosen_word = ''
+
+            if time_to_break == 1:
+                word_is_complete = 0
+
+                break
+
+            elif time_to_break == 0 and x == 29:
+                for i in range(length_chosen_word):
+                    chosen_word = chosen_word + 'X'
+                    time_to_break = 1
+
+            elif time_to_break == 0:
+                for i in range(length_chosen_word):
+                    chosen_word = chosen_word + ' '
+                    time_to_break = 1
+
+        elif x == 29:
+            length_chosen_word = len(chosen_word)       # checks if word is at ground level and replaces letters with X
+            chosen_word = ''
+            for i in range(length_chosen_word):
+
+                chosen_word = chosen_word + 'X'
+
+        elif x == 30:
+           chosen_word_ticker = 0                          # is it doing anything?!
+           chosen_word_keyboard_list.clear()                # clears the keyboard list
+           build_keyboard_list = 1
+
         game_screen_list_to_print()                         # updates the screen list
         game_screen()                                       # prints the screen
+        game_keyboard_listener_and_pause_screen()
 
         the_word_move = the_word_start
         for i in chosen_word:                               # for loop takes the word to the bottom
@@ -386,7 +438,9 @@ def word_faller():
             if x != 1:
                 game_screen_list[x - 1][the_word_move - 1] = ' '        # Clears the previous row
 
-
+    #complete checker goes somewhere here
+    # word_complete_checker()
+    # word_ground_checker()
 
     # start position of word can be : (146 - len(theWord)
     # randomize the start position
@@ -397,6 +451,274 @@ def word_faller():
     # new function for word falling
 
 
+def game_keyboard_listener_and_pause_screen():
+
+    start_time = time.monotonic()
+    total_time = 0.0
+    end_time = 0.0
+
+    while total_time <= 1.0:
+
+        total_time = end_time - start_time
+        end_time = time.monotonic()
+
+        keyboard_listener()
+
+        # listen for keystrokes
+        # if key = a
+        # change color of that letter on screen
+        # word_points + 1
+        # if word_points == len(chosen_word):
+        # adds score to total score
+
+        # put the chosen word in a list
+        # current_chosen_word_letter is decided from
+        # if current_chosen_word_letter matches the key pressed then current_chosen_word_letter = the list + 1
+
+    os.system('cls')
+
+# def word_ground_checker():    checks if a word has fallen to the ground and takes away 1 hp from health bar
+
+
+def word_complete_checker():    # checks if a word is complete and takes it away from screen
+
+    global chosen_word_ticker
+    global chosen_word
+    global word_is_complete
+
+    if chosen_word_ticker == len(chosen_word):
+        chosen_word_ticker = 0
+        # word_randomizer()
+
+        word_is_complete = 1
+        return 1
+    else:
+        return 0
+
+
+def keyboard_listener():
+
+    global chosen_word_ticker
+    global build_keyboard_list
+    global chosen_word
+    global current_chosen_word_letter
+    # global chosen_word_complete_ticker
+
+    if build_keyboard_list == 1:
+        for i in chosen_word:
+            chosen_word_keyboard_list.append(i)
+        build_keyboard_list = 0                                 # remember to delete list when finished with the word
+                                                            # or it will coninue building on it
+                                                            # build_keyboard_list = 1 has to be added somewhere,
+                                                            # when new word comes
+    if chosen_word_ticker < len(chosen_word_keyboard_list):
+        current_chosen_word_letter = chosen_word_keyboard_list[chosen_word_ticker]
+
+
+        if keyboard.is_pressed('a'):
+            if 'a' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('b'):
+            if 'b' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('c'):
+            if 'c' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('d'):
+            if 'd' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('e'):
+            if 'e' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('f'):
+            if 'f' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('g'):
+            if 'g' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('h'):
+            if 'h' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('i'):
+            if 'i' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('j'):
+            if 'j' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('k'):
+            if 'k' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('l'):
+            if 'l' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('m'):
+            if 'm' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('n'):
+            if 'n' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('o'):
+            if 'o' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('p'):
+            if 'p' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('q'):
+            if 'q' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('r'):
+            if 'r' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('s'):
+            if 's' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('t'):
+            if 't' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('u'):
+            if 'u' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('v'):
+            if 'v' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('x'):
+            if 'x' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('y'):
+            if 'y' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+        elif keyboard.is_pressed('z'):
+            if 'z' == current_chosen_word_letter:
+                chosen_word_keyboard_list[chosen_word_ticker] = 'X'
+                chosen_word = ''
+                for i in chosen_word_keyboard_list:
+                    chosen_word = chosen_word + i
+                chosen_word_ticker = chosen_word_ticker + 1
+
+    #elif chosen_word_ticker == len(chosen_word_keyboard_list):
+     #   chosen_word_keyboard_list.clear()                           # clears the keyboard list
+      #  build_keyboard_list = 1
+       # chosen_word_ticker = 0
 
 pyautogui.press('f11')
 word_randomizer()
