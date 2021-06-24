@@ -6,7 +6,8 @@ import pyautogui
 import re
 import random
 import pathlib
-
+from colorama import init
+from termcolor import colored
 
 game_screen_list = []
 chosen_word_keyboard_list = []
@@ -49,6 +50,20 @@ chosen_word_ticker = 0
 build_keyboard_list = 1
 word_is_complete = 0
 
+health_points = 5
+health_points_is_changed = 1
+health_points_print = ''
+
+game_speed = 0.2                # 0.5 is faster than 1.0
+
+init()      # for colorama and termcolor
+
+display_string1 = ''
+display_string2 = ''
+display_string3 = ''
+display_string4 = ''
+display_string5 = ''
+
 
 def main_menu():
 
@@ -82,7 +97,6 @@ def the_game():
     while 1 == 1:
         word_faller()
         word_randomizer()
-       # game_screen()
 
 
 def game_options():
@@ -93,7 +107,21 @@ def game_high_score():
     print('game_high_score')
 
 
+def health_points_to_print():
+
+    global health_points
+    global health_points_print
+
+    health_points_print = ''
+    for i in range(health_points):
+        health_points_print = health_points_print + "  "
+
+
 def game_screen():
+
+    global health_points
+    global health_points_print
+
     game_screen_list_to_print()
 
     global screen_row1
@@ -128,10 +156,13 @@ def game_screen():
     global screen_row30
     global screen_row31
 
+    health_points_to_print()
+
     print('')
     print('')
     print('')
-    print('')
+    print('                                   Health:', end="")
+    print(colored(health_points_print, 'green', 'on_green'))
     print('')
 
     print(screen_row1)
@@ -166,8 +197,6 @@ def game_screen():
     print(screen_row30)
     print(screen_row31)
 
-    #game_keyboard_listener_and_pause_screen()
-
 
 def create_game_screen_list():
 
@@ -184,8 +213,6 @@ def create_game_screen_list():
     for i in range(1, 29):
         for z in range(36, 146):
             game_screen_list[i][z] = ' '
-
-    # print(game_screen_list)
 
 
 def game_screen_list_to_print():
@@ -369,6 +396,7 @@ def word_randomizer():
     chosen_word_keyboard_list.clear()  # clears the keyboard list
     build_keyboard_list = 1
 
+
 def word_faller():
 
     global game_screen_list
@@ -377,6 +405,7 @@ def word_faller():
     global build_keyboard_list
     global chosen_word_ticker
     global word_is_complete
+    global health_points
 
     max_word_start = 146 - len(chosen_word)
 
@@ -416,14 +445,20 @@ def word_faller():
         elif x == 29:
             length_chosen_word = len(chosen_word)       # checks if word is at ground level and replaces letters with X
             chosen_word = ''
+            health_points = health_points - 1
+
             for i in range(length_chosen_word):
 
                 chosen_word = chosen_word + 'X'
 
         elif x == 30:
-           chosen_word_ticker = 0                          # is it doing anything?!
-           chosen_word_keyboard_list.clear()                # clears the keyboard list
-           build_keyboard_list = 1
+
+            chosen_word_ticker = 0
+            chosen_word_keyboard_list.clear()                # clears the keyboard list
+            build_keyboard_list = 1
+
+        elif health_points == 0:
+            game_lose()
 
         game_screen_list_to_print()                         # updates the screen list
         game_screen()                                       # prints the screen
@@ -438,46 +473,23 @@ def word_faller():
             if x != 1:
                 game_screen_list[x - 1][the_word_move - 1] = ' '        # Clears the previous row
 
-    #complete checker goes somewhere here
-    # word_complete_checker()
-    # word_ground_checker()
-
-    # start position of word can be : (146 - len(theWord)
-    # randomize the start position
-    # game_screen_list[0][7] some kind of for loop ---> word length of BOB    word is BOB
-    # screen clears and pause for 1 sec
-    # game_screen_list[1][7]
-
-    # new function for word falling
-
 
 def game_keyboard_listener_and_pause_screen():
+
+    global game_speed
 
     start_time = time.monotonic()
     total_time = 0.0
     end_time = 0.0
 
-    while total_time <= 1.0:
+    while total_time <= game_speed:
 
         total_time = end_time - start_time
         end_time = time.monotonic()
 
         keyboard_listener()
 
-        # listen for keystrokes
-        # if key = a
-        # change color of that letter on screen
-        # word_points + 1
-        # if word_points == len(chosen_word):
-        # adds score to total score
-
-        # put the chosen word in a list
-        # current_chosen_word_letter is decided from
-        # if current_chosen_word_letter matches the key pressed then current_chosen_word_letter = the list + 1
-
     os.system('cls')
-
-# def word_ground_checker():    checks if a word has fallen to the ground and takes away 1 hp from health bar
 
 
 def word_complete_checker():    # checks if a word is complete and takes it away from screen
@@ -488,7 +500,6 @@ def word_complete_checker():    # checks if a word is complete and takes it away
 
     if chosen_word_ticker == len(chosen_word):
         chosen_word_ticker = 0
-        # word_randomizer()
 
         word_is_complete = 1
         return 1
@@ -502,18 +513,14 @@ def keyboard_listener():
     global build_keyboard_list
     global chosen_word
     global current_chosen_word_letter
-    # global chosen_word_complete_ticker
 
     if build_keyboard_list == 1:
         for i in chosen_word:
             chosen_word_keyboard_list.append(i)
-        build_keyboard_list = 0                                 # remember to delete list when finished with the word
-                                                            # or it will coninue building on it
-                                                            # build_keyboard_list = 1 has to be added somewhere,
-                                                            # when new word comes
+        build_keyboard_list = 0
+
     if chosen_word_ticker < len(chosen_word_keyboard_list):
         current_chosen_word_letter = chosen_word_keyboard_list[chosen_word_ticker]
-
 
         if keyboard.is_pressed('a'):
             if 'a' == current_chosen_word_letter:
@@ -715,14 +722,916 @@ def keyboard_listener():
                     chosen_word = chosen_word + i
                 chosen_word_ticker = chosen_word_ticker + 1
 
-    #elif chosen_word_ticker == len(chosen_word_keyboard_list):
-     #   chosen_word_keyboard_list.clear()                           # clears the keyboard list
-      #  build_keyboard_list = 1
-       # chosen_word_ticker = 0
+
+def game_lose():
+
+    big_text_display()
+    time.sleep(3)
+    quit()
+
+
+def big_text_display():
+
+    string_list = []
+
+    display_list1 = []
+    display_list2 = []
+    display_list3 = []
+    display_list4 = []
+    display_list5 = []
+
+    def word_chopper():
+        for i in my_string:
+            string_list.append(i)
+
+    def display_screen():
+
+        global display_string1
+        global display_string2
+        global display_string3
+        global display_string4
+        global display_string5
+
+        print(display_string1)
+        print(display_string2)
+        print(display_string3)
+        print(display_string4)
+        print(display_string5)
+
+    def small_to_big_letters():
+
+        for x in string_list:
+            if x == 'A':
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'B':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'C':
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'D':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'E':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'F':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'G':
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'H':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'I':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'J':
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'K':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'L':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'M':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'N':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'O':
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'P':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'Q':
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'R':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'S':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'T':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'U':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'V':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'W':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'X':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == 'Y':
+                display_list1.append('#')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append('#')
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+            elif x == 'Z':
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append('#')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append('#')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append('#')
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append('#')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append('#')
+                display_list5.append(' ')
+
+            elif x == ' ':
+                display_list1.append(' ')
+                display_list1.append(' ')
+                display_list1.append(' ')
+
+                display_list2.append(' ')
+                display_list2.append(' ')
+                display_list2.append(' ')
+
+                display_list3.append(' ')
+                display_list3.append(' ')
+                display_list3.append(' ')
+
+                display_list4.append(' ')
+                display_list4.append(' ')
+                display_list4.append(' ')
+
+                display_list5.append(' ')
+                display_list5.append(' ')
+                display_list5.append(' ')
+
+    def list_to_string():
+
+        global display_string1
+        global display_string2
+        global display_string3
+        global display_string4
+        global display_string5
+
+        for x in display_list1:
+            display_string1 = display_string1 + x
+
+        for x in display_list2:
+            display_string2 = display_string2 + x
+
+        for x in display_list3:
+            display_string3 = display_string3 + x
+
+        for x in display_list4:
+            display_string4 = display_string4 + x
+
+        for x in display_list5:
+            display_string5 = display_string5 + x
+
+    my_string = 'YOU LOSE'
+    word_chopper()
+    small_to_big_letters()
+    list_to_string()
+    display_screen()
+    time.sleep(5)
+
 
 pyautogui.press('f11')
 word_randomizer()
-print(chosen_word)
 create_game_screen_list()
 
 main_menu()
